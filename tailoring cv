@@ -1,0 +1,76 @@
+import re
+import json
+from collections import Counter
+
+def extract_keywords(job_description):
+    """Extracts keywords from a job description."""
+    keywords = re.findall(r'\b[A-Za-z]+\b', job_description.lower())
+    return Counter(keywords)
+
+def tailor_cv(job_description_file, cv_template_file, output_cv_file):
+    """Generates a tailored CV based on job description."""
+    with open(job_description_file, "r") as f:
+        job_description = f.read()
+    
+    job_keywords = extract_keywords(job_description)
+    
+    # Load base CV template
+    with open(cv_template_file, "r") as f:
+        cv_template = f.read()
+    
+    # Update sections dynamically
+    summary = f"Experienced professional skilled in {', '.join(list(job_keywords.keys())[:5])}."
+    skills = ", ".join(set(job_keywords.keys()))
+    
+    customized_cv = cv_template.replace("[SUMMARY]", summary)
+    customized_cv = customized_cv.replace("[SKILLS]", skills)
+    
+    # Save tailored CV
+    with open(output_cv_file, "w") as f:
+        f.write(customized_cv)
+    
+    print(f"Tailored CV saved as {output_cv_file}")
+
+# Example usage
+tailor_cv("job_description.txt", "cv_template.md", "tailored_cv.md")
+
+# cv_template.md
+"""
+# [Your Name]
+## [Your Contact Information]
+
+## Summary
+[SUMMARY]
+
+## Experience
+- Managed research projects and funding applications.
+- Developed machine learning models for neuroscience data.
+- Coordinated academic collaborations and grant proposals.
+
+## Skills
+[SKILLS]
+
+## Education
+[EDUCATION]
+"""
+
+# job_description.txt
+"""
+Seeking a research administrator with expertise in neuroscience, data analysis, and project management. Experience with machine learning is a plus.
+"""
+
+# README.md
+"""
+# CV Tailoring Script
+
+This Python script customizes your CV based on a job description.
+
+## Usage
+1. Save your job description as `job_description.txt`
+2. Prepare a base CV template (`cv_template.md`) with placeholders `[SUMMARY]` and `[SKILLS]`
+3. Run the script:
+   ```sh
+   python tailor_cv.py
+   ```
+4. Your tailored CV will be saved as `tailored_cv.md`
+"""
