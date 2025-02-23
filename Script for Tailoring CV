@@ -1,0 +1,42 @@
+import re
+import json
+from collections import Counter
+from docx import Document
+
+# Load job description
+with open("job_description.txt", "r") as f:
+    job_description = f.read()
+
+# Extract important keywords (this is a simple approach)
+keywords = re.findall(r'\b[A-Za-z]+\b', job_description.lower())
+keyword_counts = Counter(keywords)
+
+# Define a mapping of relevant CV sections to update
+cv_data = {
+    "summary": "Experienced professional with expertise in neuroscience and research administration.",
+    "experience": [
+        "Managed research projects and funding applications.",
+        "Developed machine learning models for neuroscience data.",
+        "Coordinated academic collaborations and grant proposals."
+    ],
+    "skills": ["Python", "Data Analysis", "Neuroscience", "Project Management"]
+}
+
+# Update the summary dynamically
+cv_data["summary"] += f" Key expertise includes {', '.join(list(keyword_counts.keys())[:5])}."
+
+# Modify skills based on job description
+job_keywords = set(keyword_counts.keys())
+cv_data["skills"] = list(set(cv_data["skills"]).union(job_keywords))
+
+# Generate a tailored CV file
+cv_file = "tailored_cv.md"
+with open(cv_file, "w") as f:
+    f.write(f"# {cv_data['summary']}\n\n")
+    f.write("## Experience\n")
+    for exp in cv_data["experience"]:
+        f.write(f"- {exp}\n")
+    f.write("\n## Skills\n")
+    f.write(", ".join(cv_data["skills"]))
+
+print(f"Tailored CV saved as {cv_file}")
